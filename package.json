@@ -27,7 +27,7 @@
     "email": "sachi77n@gmail.com",
     "url": "https://github.com/sachinchoolur"
   },
-  "main": "lib/js/lightgallery.js",
+  "main": "src/js/lightgallery.js",
   "style": "dist/css/lightgallery.css",
   "repository": {
     "type": "git",
