@@ -1,5 +1,5 @@
 /**!
- * lightgallery.js | 1.0.4 | June 6th 2018
+ * lightgallery.js | 1.2.0 | May 25th 2020
  * http://sachinchoolur.github.io/lightgallery.js/
  * Copyright (c) 2016 Sachin N; 
  * @license GPLv3 
@@ -23,26 +23,14 @@
         value: true
     });
 
-    /*
-     *@todo remove function from window and document. Update on and off functions
-     */
-    window.getAttribute = function (label) {
-        return window[label];
-    };
-
-    window.setAttribute = function (label, value) {
-        window[label] = value;
-    };
-
-    document.getAttribute = function (label) {
-        return document[label];
-    };
-
-    document.setAttribute = function (label, value) {
-        document[label] = value;
-    };
-
     var utils = {
+        getAttribute: function getAttribute(el, label) {
+            return el[label];
+        },
+
+        setAttribute: function setAttribute(el, label, value) {
+            el[label] = value;
+        },
         wrap: function wrap(el, className) {
             if (!el) {
                 return;
@@ -85,8 +73,6 @@
             } else {
                 return new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
             }
-
-            return false;
         },
 
         // ex Transform
@@ -120,15 +106,17 @@
             uid: 0
         },
         on: function on(el, events, fn) {
+            var _this = this;
+
             if (!el) {
                 return;
             }
 
             events.split(' ').forEach(function (event) {
-                var _id = el.getAttribute('lg-event-uid') || '';
+                var _id = _this.getAttribute(el, 'lg-event-uid') || '';
                 utils.Listener.uid++;
                 _id += '&' + utils.Listener.uid;
-                el.setAttribute('lg-event-uid', _id);
+                _this.setAttribute(el, 'lg-event-uid', _id);
                 utils.Listener[event + utils.Listener.uid] = fn;
                 el.addEventListener(event.split('.')[0], fn, false);
             });
@@ -139,7 +127,7 @@
                 return;
             }
 
-            var _id = el.getAttribute('lg-event-uid');
+            var _id = this.getAttribute(el, 'lg-event-uid');
             if (_id) {
                 _id = _id.split('&');
                 for (var i = 0; i < _id.length; i++) {
@@ -150,14 +138,14 @@
                                 if (utils.Listener.hasOwnProperty(key)) {
                                     if (key.split('.').indexOf(_event.split('.')[1]) > -1) {
                                         el.removeEventListener(key.split('.')[0], utils.Listener[key]);
-                                        el.setAttribute('lg-event-uid', el.getAttribute('lg-event-uid').replace('&' + _id[i], ''));
+                                        this.setAttribute(el, 'lg-event-uid', this.getAttribute(el, 'lg-event-uid').replace('&' + _id[i], ''));
                                         delete utils.Listener[key];
                                     }
                                 }
                             }
                         } else {
                             el.removeEventListener(_event.split('.')[0], utils.Listener[_event]);
-                            el.setAttribute('lg-event-uid', el.getAttribute('lg-event-uid').replace('&' + _id[i], ''));
+                            this.setAttribute(el, 'lg-event-uid', this.getAttribute(el, 'lg-event-uid').replace('&' + _id[i], ''));
                             delete utils.Listener[_event];
                         }
                     }
@@ -260,6 +248,12 @@
         hideBarsDelay: 6000,
 
         useLeft: false,
+
+        // aria-labelledby attribute fot gallery
+        ariaLabelledby: '',
+
+        //aria-describedby attribute for gallery
+        ariaDescribedby: '',
 
         closable: true,
         loop: true,
@@ -508,17 +502,21 @@
 
         // Create controlls
         if (this.s.controls && this.items.length > 1) {
-            controls = '<div class="lg-actions">' + '<div class="lg-prev lg-icon">' + this.s.prevHtml + '</div>' + '<div class="lg-next lg-icon">' + this.s.nextHtml + '</div>' + '</div>';
+            controls = '<div class="lg-actions">' + '<button aria-label="Previous slide" class="lg-prev lg-icon">' + this.s.prevHtml + '</button>' + '<button aria-label="Next slide" class="lg-next lg-icon">' + this.s.nextHtml + '</button>' + '</div>';
         }
 
         if (this.s.appendSubHtmlTo === '.lg-sub-html') {
-            subHtmlCont = '<div class="lg-sub-html"></div>';
+            subHtmlCont = '<div role="status" aria-live="polite" class="lg-sub-html"></div>';
         }
 
-        template = '<div class="lg-outer ' + this.s.addClass + ' ' + this.s.startClass + '">' + '<div class="lg" style="width:' + this.s.width + '; height:' + this.s.height + '">' + '<div class="lg-inner">' + list + '</div>' + '<div class="lg-toolbar lg-group">' + '<span class="lg-close lg-icon"></span>' + '</div>' + controls + subHtmlCont + '</div>' + '</div>';
+        var ariaLabelledby = this.s.ariaLabelledby ? 'aria-labelledby="' + this.s.ariaLabelledby + '"' : '';
+        var ariaDescribedby = this.s.ariaDescribedby ? 'aria-describedby="' + this.s.ariaDescribedby + '"' : '';
+
+        template = '<div tabindex="-1" aria-modal="true" ' + ariaLabelledby + ' ' + ariaDescribedby + ' role="dialog" class="lg-outer ' + this.s.addClass + ' ' + this.s.startClass + '">' + '<div class="lg" style="width:' + this.s.width + '; height:' + this.s.height + '">' + '<div class="lg-inner">' + list + '</div>' + '<div class="lg-toolbar group">' + '<button aria-label="Close gallery" class="lg-close lg-icon"></button>' + '</div>' + controls + subHtmlCont + '</div>' + '</div>';
 
         document.body.insertAdjacentHTML('beforeend', template);
         this.outer = document.querySelector('.lg-outer');
+        this.outer.focus();
         this.___slide = this.outer.querySelectorAll('.lg-item');
 
         if (this.s.useLeft) {
@@ -576,7 +574,7 @@
         }, this.s.backdropDuration);
 
         if (this.s.download) {
-            this.outer.querySelector('.lg-toolbar').insertAdjacentHTML('beforeend', '<a id="lg-download" target="_blank" download class="lg-download lg-icon"></a>');
+            this.outer.querySelector('.lg-toolbar').insertAdjacentHTML('beforeend', '<a id="lg-download" aria-label="Download" target="_blank" download class="lg-download lg-icon"></a>');
         }
 
         // Store the current scroll top value to scroll back after closing the gallery..
@@ -674,7 +672,7 @@
      */
     Plugin.prototype.counter = function () {
         if (this.s.counter) {
-            this.outer.querySelector(this.s.appendCounterTo).insertAdjacentHTML('beforeend', '<div id="lg-counter"><span id="lg-counter-current">' + (parseInt(this.index, 10) + 1) + '</span> / <span id="lg-counter-all">' + this.items.length + '</span></div>');
+            this.outer.querySelector(this.s.appendCounterTo).insertAdjacentHTML('beforeend', '<div id="lg-counter" role="status" aria-live="polite"><span id="lg-counter-current">' + (parseInt(this.index, 10) + 1) + '</span> / <span id="lg-counter-all">' + this.items.length + '</span></div>');
         }
     };
 
@@ -774,6 +772,7 @@
         var _srcset;
         var _sizes;
         var _html;
+        var _alt;
         var getResponsiveSrc = function getResponsiveSrc(srcItms) {
             var rsWidth = [];
             var rsSrc = [];
@@ -807,6 +806,7 @@
 
             _html = _this.s.dynamicEl[index].html;
             _src = _this.s.dynamicEl[index].src;
+            _alt = _this.s.dynamicEl[index].alt;
 
             if (_this.s.dynamicEl[index].responsive) {
                 var srcDyItms = _this.s.dynamicEl[index].responsive.split(',');
@@ -824,6 +824,11 @@
 
             _html = _this.items[index].getAttribute('data-html');
             _src = _this.items[index].getAttribute('href') || _this.items[index].getAttribute('data-src');
+            _alt = _this.items[index].getAttribute('title');
+
+            if (_this.items[index].querySelector('img')) {
+                _alt = _alt || _this.items[index].querySelector('img').getAttribute('alt');
+            }
 
             if (_this.items[index].getAttribute('data-responsive')) {
                 var srcItms = _this.items[index].getAttribute('data-responsive').split(',');
@@ -870,7 +875,8 @@
                     html: _html
                 });
             } else {
-                _this.___slide[index].insertAdjacentHTML('beforeend', '<div class="lg-img-wrap"><img class="lg-object lg-image" src="' + _src + '" /></div>');
+                _alt = _alt ? 'alt="' + _alt + '"' : '';
+                _this.___slide[index].insertAdjacentHTML('beforeend', '<div class="lg-img-wrap"><img class="lg-object lg-image" ' + _alt + ' src="' + _src + '" /></div>');
             }
 
             _lgUtils2.default.trigger(_this.el, 'onAferAppendSlide', {
@@ -1264,8 +1270,8 @@
                 prev.removeAttribute('disabled');
                 _lgUtils2.default.removeClass(prev, 'disabled');
             } else {
-                next.setAttribute('disabled', 'disabled');
-                _lgUtils2.default.addClass(next, 'disabled');
+                prev.setAttribute('disabled', 'disabled');
+                _lgUtils2.default.addClass(prev, 'disabled');
             }
         }
     };
@@ -1558,7 +1564,7 @@
         // Distroy all lightGallery modules
         for (var key in window.lgModules) {
             if (_this.modules[key]) {
-                _this.modules[key].destroy();
+                _this.modules[key].destroy(d);
             }
         }
 
@@ -1588,6 +1594,7 @@
                 if (!d) {
                     _lgUtils2.default.trigger(_this.el, 'onCloseAfter');
                 }
+                _this.el.focus();
             } catch (err) {}
         }, _this.s.backdropDuration + 50);
     };
