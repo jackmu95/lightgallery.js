@@ -10,6 +10,7 @@
 @import "lg-pager";
 @import "lg-fullscreen";
 @import "lg-share";
+@import "lg-rotate";
 
 // Clearfix
 .lg-group:after {
@@ -27,6 +28,7 @@
     left: 0;
     z-index: $zindex-outer;
     opacity: 0;
+    outline: none;
     // For start/end transition
     @include transition(opacity 0.15s ease 0s);
 
