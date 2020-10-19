@@ -36,6 +36,7 @@ Full featured JavaScript lightbox gallery. No dependencies.
 * Keyboard Navigation for desktop.
 * Font icon support.
 * Rotate, flip images.
+* Accessibility support.
 * And many more.
 
 ## Browser support
@@ -44,21 +45,25 @@ lightgallery supports all major browsers including IE 9 and above.
 
 ## Installation
 
-### Install with Bower
+### Install with NPM
 
-You can install `lightgallery` using the [Bower](http://bower.io) package manager.
+You can install `lightgallery.js` using the [npm](https://www.npmjs.com/) package manager.
+
+```sh
+npm install lightgallery.js
+```
+
+You can also find `lightgallery.js` on [Yarn](https://yarnpkg.com/) and [Bower](http://bower.io).
+### Yarn
+```sh
+yarn add lightgallery.js
+```
+### Bower
 
 ```sh
 bower install lightgallery.js --save
 ```
 
-### npm
-
-You can also find `lightgallery` on [npm](https://www.npmjs.com/).
-
-```sh
-npm install lightgallery.js
-```
 
 ### CDN
 

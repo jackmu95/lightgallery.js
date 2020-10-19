@@ -13,9 +13,17 @@
 @import "lg-rotate";
 
 // Clearfix
-.lg-group:after {
-    content: "";
+.lg-group {
+    *zoom: 1;
+}
+
+.lg-group:before, .lg-group:after {
     display: table;
+    content: "";
+    line-height: 0;
+}
+
+.lg-group:after {
     clear: both;
 }
 

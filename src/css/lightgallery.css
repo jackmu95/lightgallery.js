@@ -878,21 +878,24 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item.lg-complete .lg-object 
 }
 
 .lg-flip-hor:after {
-  content: "\e903";
-}
-
-.lg-flip-ver:after {
   content: "\e902";
 }
 
-.group {
+.lg-flip-ver:after {
+  content: "\e903";
+}
+
+.lg-group {
   *zoom: 1;
 }
 
-.group:before, .group:after {
+.lg-group:before, .lg-group:after {
   display: table;
   content: "";
-  display: table;
+  line-height: 0;
+}
+
+.lg-group:after {
   clear: both;
 }
 
@@ -1148,5 +1151,3 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item.lg-complete .lg-object 
   -o-transition: left 1s cubic-bezier(0, 0, 0.25, 1) 0s, opacity 0.1s ease 0s;
   transition: left 1s cubic-bezier(0, 0, 0.25, 1) 0s, opacity 0.1s ease 0s;
 }
-
-/*# sourceMappingURL=lightgallery.css.map */
